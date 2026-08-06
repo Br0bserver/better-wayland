@@ -20,6 +20,11 @@ public final class PreeditKeyIsolation {
         }
     }
 
+    public void reset() {
+        awaitingCharacter = false;
+        suppressedKeys.clear();
+    }
+
     public boolean shouldSuppress(int key, int action, int modifiers) {
         if (action == GLFW_RELEASE) {
             return suppressedKeys.remove(key);

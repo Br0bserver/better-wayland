@@ -96,4 +96,17 @@ class PreeditKeyIsolationTest {
         assertFalse(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_REPEAT, 0));
         assertFalse(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_RELEASE, 0));
     }
+
+    @Test
+    void resetClearsPendingStateAndSuppressedReleases() {
+        PreeditKeyIsolation isolation = new PreeditKeyIsolation();
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_N, GLFW_PRESS, 0));
+        assertTrue(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_PRESS, 0));
+
+        isolation.reset();
+
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_REPEAT, 0));
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_RELEASE, 0));
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_BACKSPACE, GLFW_PRESS, 0));
+    }
 }

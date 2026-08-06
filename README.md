@@ -37,6 +37,9 @@ The failures addressed by the project fall into separate layers:
   as its normal character callback arrives.
 - **Stuck keys:** a focus loss during pointer-lock changes can omit release
   events. Wayland focus loss now releases Minecraft's key mappings.
+- **IME focus lifetime:** the Java-side IME correlation state is reset when the
+  active screen or focused widget changes, so a composition cannot leak into a
+  later screen.
 - **Cursor and event-loop behavior:** the native patchset covers cursor-warp
   fallback, fullscreen size callbacks, fractional framebuffer rounding, cursor
   shape, and explicit Wayland selection. Event-loop/swap stalls remain native

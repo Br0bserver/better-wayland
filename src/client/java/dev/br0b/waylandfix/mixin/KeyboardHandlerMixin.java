@@ -28,8 +28,23 @@ public final class KeyboardHandlerMixin {
     @Unique
     private final PreeditKeyIsolation waylandfix$preeditKeys = new PreeditKeyIsolation();
 
+    @Unique
+    private Object waylandfix$lastScreen;
+
+    @Unique
+    private Object waylandfix$lastFocus;
+
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void waylandfix$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
+        Object currentScreen = minecraft.screen;
+        Object currentFocus = currentScreen == null ? null : minecraft.screen.getFocused();
+        if (currentScreen != waylandfix$lastScreen || currentFocus != waylandfix$lastFocus) {
+            waylandfix$input.clear();
+            waylandfix$preeditKeys.reset();
+            waylandfix$lastScreen = currentScreen;
+            waylandfix$lastFocus = currentFocus;
+        }
+
         boolean isWaylandWindow = window == minecraft.getWindow().handle()
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND;
         if (minecraft.screen == null) {
