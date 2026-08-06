@@ -43,7 +43,9 @@ git -C "${patch_cache}" worktree add --detach "${work_dir}/patches" "${patch_com
 # 0001 drops every Ctrl/Alt character and breaks AltGr/IME layouts. Minecraft
 # 26.1.2 uses the plain char callback, so Java-side correlation handles only
 # consumed shortcuts/opening keys. Apply the remaining native fixes.
-git -C "${work_dir}/glfw" am \
+git -C "${work_dir}/glfw" \
+  -c user.name=WaylandFix -c user.email=waylandfix@invalid \
+  am \
   "${work_dir}/patches/0002-Implement-glfwSetCursorPos-with-fallback-for-older-c.patch" \
   "${work_dir}/patches/0003-Fix-window-size-callback-not-firing-on-unset-fullscr.patch" \
   "${work_dir}/patches/0004-Fix-framebuffer-size-rounding-with-fractional-scalin.patch"
@@ -65,7 +67,9 @@ git -C "${work_dir}/glfw" \
   -c user.name=WaylandFix -c user.email=waylandfix@invalid \
   commit -m "Apply cursor shape protocol compatibility" >/dev/null
 
-git -C "${work_dir}/glfw" am \
+git -C "${work_dir}/glfw" \
+  -c user.name=WaylandFix -c user.email=waylandfix@invalid \
+  am \
   "${work_dir}/patches/0006-Add-GLFW_FORCE_WAYLAND-env-var-to-override-app-reque.patch" \
   "${work_dir}/patches/0007-Add-GLFW_USE_LEGACY_CURSOR_WARP-env-var-to-opt-out-o.patch"
 
