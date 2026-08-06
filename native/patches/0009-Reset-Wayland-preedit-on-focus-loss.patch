@@ -1,0 +1,31 @@
+diff --git a/src/wl_window.c b/src/wl_window.c
+index 8e1d1c31..f7d0f8af 100644
+--- a/src/wl_window.c
++++ b/src/wl_window.c
+@@ -3945,4 +3945,26 @@ void _glfwUpdatePreeditCursorRectangleWayland(_GLFWwindow* window)
+ 
+ void _glfwResetPreeditTextWayland(_GLFWwindow* window)
+ {
++    _GLFWpreedit* preedit = &window->preedit;
++
++    if (window->wl.textInputV3)
++    {
++        // text-input-v3 has no reset request. A disable/enable transaction
++        // cancels the compositor's current composition before the next field
++        // receives Minecraft's fresh preedit state.
++        zwp_text_input_v3_disable(window->wl.textInputV3);
++        zwp_text_input_v3_commit(window->wl.textInputV3);
++        textInputV3Reset(window);
++        zwp_text_input_v3_enable(window->wl.textInputV3);
++        zwp_text_input_v3_commit(window->wl.textInputV3);
++    }
++    else if (window->wl.textInputV1)
++    {
++        zwp_text_input_v1_reset(window->wl.textInputV1);
++        textInputV1Reset(window);
++    }
++    else
++        textInputV3Reset(window);
++
++    preedit->candidateCount = 0;
+ }

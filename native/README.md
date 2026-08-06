@@ -18,5 +18,8 @@ each run, so applying the mail patches is repeatable. One upstream CMake
 context difference in the cursor-shape mail patch is normalized without
 changing its source hunks. The script also checks that the
 LWJGL-CI IME/preedit entry points are exported before copying the library.
-The generated library, checksum, and source manifest are ignored by Git.
+The generated library, checksum, and source manifest are ignored by Git. Local
+patch 0009 resets the Wayland text-input-v3/v1 composition when Minecraft moves
+focus between text widgets, so the compositor cannot carry a candidate window
+from the old widget into the new one.
 Release CI must run this task before assembling a beta jar.

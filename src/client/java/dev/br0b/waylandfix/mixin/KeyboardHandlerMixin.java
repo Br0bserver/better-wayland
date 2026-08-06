@@ -2,6 +2,7 @@ package dev.br0b.waylandfix.mixin;
 
 import dev.br0b.waylandfix.input.InputSuppression;
 import dev.br0b.waylandfix.input.PreeditKeyIsolation;
+import dev.br0b.waylandfix.input.PreeditResettable;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(KeyboardHandler.class)
-public final class KeyboardHandlerMixin {
+public final class KeyboardHandlerMixin implements PreeditResettable {
     @Shadow
     @Final
     private Minecraft minecraft;
@@ -33,6 +34,16 @@ public final class KeyboardHandlerMixin {
 
     @Unique
     private Object waylandfix$lastFocus;
+
+    @Shadow
+    private PreeditEvent lastPreeditEvent;
+
+    @Override
+    public void waylandfix$resetPreedit() {
+        lastPreeditEvent = null;
+        waylandfix$input.clear();
+        waylandfix$preeditKeys.reset();
+    }
 
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void waylandfix$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
@@ -68,7 +79,7 @@ public final class KeyboardHandlerMixin {
     private void waylandfix$trackPreedit(long window, PreeditEvent event, CallbackInfo callback) {
         if (window == minecraft.getWindow().handle()
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
-            waylandfix$preeditKeys.observePreedit(event.fullText());
+            waylandfix$preeditKeys.observePreedit(event == null ? null : event.fullText());
         }
     }
 

@@ -48,6 +48,16 @@ class PreeditKeyIsolationTest {
     }
 
     @Test
+    void nullPreeditClearsMissingCharacterState() {
+        PreeditKeyIsolation isolation = new PreeditKeyIsolation();
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_N, GLFW_PRESS, 0));
+        isolation.observePreedit(null);
+
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_ENTER, GLFW_PRESS, 0));
+        assertFalse(isolation.shouldSuppress(GLFW_KEY_BACKSPACE, GLFW_PRESS, 0));
+    }
+
+    @Test
     void commandModifiedLettersDoNotArmIsolation() {
         PreeditKeyIsolation isolation = new PreeditKeyIsolation();
 
