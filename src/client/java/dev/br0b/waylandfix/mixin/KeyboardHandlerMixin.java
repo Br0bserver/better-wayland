@@ -1,10 +1,13 @@
 package dev.br0b.waylandfix.mixin;
 
 import dev.br0b.waylandfix.input.InputSuppression;
+import dev.br0b.waylandfix.input.PreeditKeyIsolation;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.PreeditEvent;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,14 +25,34 @@ public final class KeyboardHandlerMixin {
     @Unique
     private final InputSuppression waylandfix$input = new InputSuppression();
 
-    @Inject(method = "keyPress", at = @At("HEAD"))
+    @Unique
+    private final PreeditKeyIsolation waylandfix$preeditKeys = new PreeditKeyIsolation();
+
+    @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void waylandfix$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
+        boolean isWaylandWindow = window == minecraft.getWindow().handle()
+                && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND;
         if (minecraft.screen == null) {
             boolean opensTextScreen = minecraft.options.keyChat.matches(event)
                     || minecraft.options.keyCommand.matches(event);
             waylandfix$input.observeGameplayKey(event.key(), action, opensTextScreen);
+            if (isWaylandWindow) {
+                waylandfix$preeditKeys.updatePreedit(null);
+            }
         } else {
             waylandfix$input.clear();
+        }
+
+        if (isWaylandWindow && waylandfix$preeditKeys.shouldSuppress(event.key(), action)) {
+            callback.cancel();
+        }
+    }
+
+    @Inject(method = "preeditCallback", at = @At("HEAD"))
+    private void waylandfix$trackPreedit(long window, PreeditEvent event, CallbackInfo callback) {
+        if (window == minecraft.getWindow().handle()
+                && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
+            waylandfix$preeditKeys.updatePreedit(event.fullText());
         }
     }
 
