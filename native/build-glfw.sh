@@ -30,13 +30,15 @@ git -C "${glfw_cache}" update-ref refs/waylandfix/glfw "${glfw_commit}"
 git -C "${patch_cache}" update-ref refs/waylandfix/patches "${patch_commit}"
 
 work_dir="$(mktemp -d "${TMPDIR:-/tmp}/waylandfix-glfw.XXXXXXXX")"
-cleanup() { rm -rf -- "${work_dir}"; }
+cleanup() {
+  git -C "${glfw_cache}" worktree remove --force "${work_dir}/glfw" >/dev/null 2>&1 || true
+  git -C "${patch_cache}" worktree remove --force "${work_dir}/patches" >/dev/null 2>&1 || true
+  rm -rf -- "${work_dir}"
+}
 trap cleanup EXIT
 
-git clone --no-local --no-checkout "${glfw_cache}" "${work_dir}/glfw"
-git -C "${work_dir}/glfw" checkout --detach "${glfw_commit}"
-git clone --no-local --no-checkout "${patch_cache}" "${work_dir}/patches"
-git -C "${work_dir}/patches" checkout --detach "${patch_commit}"
+git -C "${glfw_cache}" worktree add --detach "${work_dir}/glfw" "${glfw_commit}"
+git -C "${patch_cache}" worktree add --detach "${work_dir}/patches" "${patch_commit}"
 
 # 0001 drops every Ctrl/Alt character and breaks AltGr/IME layouts. Minecraft
 # 26.1.2 uses the plain char callback, so Java-side correlation handles only
