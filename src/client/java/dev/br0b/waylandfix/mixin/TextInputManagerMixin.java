@@ -8,6 +8,7 @@ import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,6 +21,26 @@ public abstract class TextInputManagerMixin {
     private Window window;
 
     private static boolean loggedScale;
+
+    @Inject(method = "startTextInput", at = @At("TAIL"))
+    private void waylandfix$enableNativeIme(CallbackInfo callbackInfo) {
+        waylandfix$setNativeIme(true);
+    }
+
+    @Inject(method = "stopTextInput", at = @At("TAIL"))
+    private void waylandfix$disableNativeIme(CallbackInfo callbackInfo) {
+        waylandfix$setNativeIme(false);
+    }
+
+    @Unique
+    private void waylandfix$setNativeIme(boolean active) {
+        if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
+            GLFW.glfwSetInputMode(
+                    window.handle(),
+                    GLFW.GLFW_IME,
+                    active ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+        }
+    }
 
     @Inject(method = "setTextInputArea", at = @At("HEAD"), cancellable = true)
     private void waylandfix$setLogicalTextInputArea(

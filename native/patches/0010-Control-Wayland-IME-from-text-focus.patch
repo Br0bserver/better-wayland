@@ -1,0 +1,123 @@
+diff --git a/src/wl_platform.h b/src/wl_platform.h
+index 8d93989c..d5f0818b 100644
+--- a/src/wl_platform.h
++++ b/src/wl_platform.h
+@@ -438,6 +438,8 @@ typedef struct _GLFWwindowWayland
+     } fallback;
+     struct zwp_text_input_v1* textInputV1;
+     struct zwp_text_input_v3* textInputV3;
++    GLFWbool textInputV3Focused;
++    GLFWbool imeActive;
+     struct {
+         char* preeditText;
+         char* commitTextOnReset;
+diff --git a/src/wl_window.c b/src/wl_window.c
+index 5da71947..92cfec6c 100644
+--- a/src/wl_window.c
++++ b/src/wl_window.c
+@@ -723,7 +723,7 @@ const struct wp_fractional_scale_v1_listener fractionalScaleListener =
+ 
+ static void activateTextInputV1(_GLFWwindow* window)
+ {
+-    if (!window->wl.textInputV1)
++    if (!window->wl.textInputV1 || !window->wl.imeActive)
+         return;
+     zwp_text_input_v1_show_input_panel(window->wl.textInputV1);
+     zwp_text_input_v1_activate(window->wl.textInputV1, _glfw.wl.seat, window->wl.surface);
+@@ -2410,8 +2410,13 @@ static void textInputV3Enter(void* data,
+                              struct zwp_text_input_v3* textInputV3,
+                              struct wl_surface* surface)
+ {
+-    zwp_text_input_v3_enable(textInputV3);
+-    zwp_text_input_v3_commit(textInputV3);
++    _GLFWwindow* window = (_GLFWwindow*) data;
++    window->wl.textInputV3Focused = GLFW_TRUE;
++    if (window->wl.imeActive)
++    {
++        zwp_text_input_v3_enable(textInputV3);
++        zwp_text_input_v3_commit(textInputV3);
++    }
+ }
+ 
+ static void textInputV3Reset(_GLFWwindow* window)
+@@ -2431,8 +2436,12 @@ static void textInputV3Leave(void* data,
+                              struct wl_surface* surface)
+ {
+     _GLFWwindow* window = (_GLFWwindow*) data;
+-    zwp_text_input_v3_disable(textInputV3);
+-    zwp_text_input_v3_commit(textInputV3);
++    if (window->wl.imeActive)
++    {
++        zwp_text_input_v3_disable(textInputV3);
++        zwp_text_input_v3_commit(textInputV3);
++    }
++    window->wl.textInputV3Focused = GLFW_FALSE;
+ 
+     // Although this should be handled by IM via preedit callback, it seems that
+     // the behavior varies depending on implemention. It's cleared by IM on
+@@ -3962,11 +3971,17 @@ void _glfwResetPreeditTextWayland(_GLFWwindow* window)
+         // text-input-v3 has no reset request. A disable/enable transaction
+         // cancels the compositor's current composition before the next field
+         // receives Minecraft's fresh preedit state.
+-        zwp_text_input_v3_disable(window->wl.textInputV3);
+-        zwp_text_input_v3_commit(window->wl.textInputV3);
++        if (window->wl.imeActive && window->wl.textInputV3Focused)
++        {
++            zwp_text_input_v3_disable(window->wl.textInputV3);
++            zwp_text_input_v3_commit(window->wl.textInputV3);
++        }
+         textInputV3Reset(window);
+-        zwp_text_input_v3_enable(window->wl.textInputV3);
+-        zwp_text_input_v3_commit(window->wl.textInputV3);
++        if (window->wl.imeActive && window->wl.textInputV3Focused)
++        {
++            zwp_text_input_v3_enable(window->wl.textInputV3);
++            zwp_text_input_v3_commit(window->wl.textInputV3);
++        }
+     }
+     else if (window->wl.textInputV1)
+     {
+@@ -3981,11 +3996,42 @@ void _glfwResetPreeditTextWayland(_GLFWwindow* window)
+ 
+ void _glfwSetIMEStatusWayland(_GLFWwindow* window, int active)
+ {
++    active = active ? GLFW_TRUE : GLFW_FALSE;
++    if (window->wl.imeActive == active)
++        return;
++
++    window->wl.imeActive = active;
++    if (window->wl.textInputV3)
++    {
++        if (window->wl.textInputV3Focused)
++        {
++            if (active)
++                zwp_text_input_v3_enable(window->wl.textInputV3);
++            else
++                zwp_text_input_v3_disable(window->wl.textInputV3);
++            zwp_text_input_v3_commit(window->wl.textInputV3);
++        }
++        if (!active)
++            textInputV3Reset(window);
++    }
++    else if (window->wl.textInputV1)
++    {
++        if (active)
++            activateTextInputV1(window);
++        else
++        {
++            zwp_text_input_v1_reset(window->wl.textInputV1);
++            textInputV1Reset(window);
++            deactivateTextInputV1(window);
++        }
++    }
++
++    _glfwInputIMEStatus(window);
+ }
+ 
+ int _glfwGetIMEStatusWayland(_GLFWwindow* window)
+ {
+-    return GLFW_FALSE;
++    return window->wl.imeActive;
+ }
+ 
+ EGLenum _glfwGetEGLPlatformWayland(EGLint** attribs)

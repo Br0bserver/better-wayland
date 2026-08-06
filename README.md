@@ -40,6 +40,10 @@ The failures addressed by the project fall into separate layers:
 - **IME focus lifetime:** the Java-side IME correlation state is reset when the
   active screen or focused widget changes, so a composition cannot leak into a
   later screen.
+- **Gameplay IME isolation:** Minecraft's text-input focus now controls the
+  Wayland text-input-v3/v1 context. Outside a text field the compositor IME is
+  detached, so an IME toggle shortcut cannot turn movement keys into preedit;
+  entering chat, search, books, or signs re-enables the existing input method.
 - **Cursor and event-loop behavior:** the native patchset covers cursor-warp
   fallback, fullscreen size callbacks, fractional framebuffer rounding, cursor
   shape, and explicit Wayland selection. Event-loop/swap stalls remain native

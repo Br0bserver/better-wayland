@@ -21,5 +21,7 @@ LWJGL-CI IME/preedit entry points are exported before copying the library.
 The generated library, checksum, and source manifest are ignored by Git. Local
 patch 0009 resets the Wayland text-input-v3/v1 composition when Minecraft moves
 focus between text widgets, so the compositor cannot carry a candidate window
-from the old widget into the new one.
+from the old widget into the new one. Patch 0010 connects GLFW's IME input mode
+to Wayland text-input enable/disable transactions, keeping fcitx/IBus detached
+while Minecraft has no active text field.
 Release CI must run this task before assembling a beta jar.
