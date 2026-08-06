@@ -3,8 +3,10 @@ package dev.br0b.waylandfix.mixin;
 import dev.br0b.waylandfix.input.InputSuppression;
 import dev.br0b.waylandfix.input.PreeditKeyIsolation;
 import dev.br0b.waylandfix.input.PreeditResettable;
+import dev.br0b.waylandfix.input.TextInputFocusOwner;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.PreeditEvent;
@@ -75,15 +77,21 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
         }
     }
 
-    @Inject(method = "preeditCallback", at = @At("HEAD"))
+    @Inject(method = "preeditCallback", at = @At("HEAD"), cancellable = true)
     private void waylandfix$trackPreedit(long window, PreeditEvent event, CallbackInfo callback) {
         if (window == minecraft.getWindow().handle()
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
             waylandfix$preeditKeys.observePreedit(event == null ? null : event.fullText());
+            GuiEventListener focusOwner = ((TextInputFocusOwner) minecraft).waylandfix$getTextInputFocusOwner();
+            if (focusOwner != null) {
+                lastPreeditEvent = event;
+                KeyboardHandler.submitPreeditEvent(focusOwner, event);
+                callback.cancel();
+            }
         }
     }
 
-    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, order = 900)
     private void waylandfix$dropOpeningCharacter(long window, CharacterEvent event, CallbackInfo callback) {
         waylandfix$preeditKeys.observeCharacter();
         if (waylandfix$input.consumeOpeningCharacter(event.codepoint())) {

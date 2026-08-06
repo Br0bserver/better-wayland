@@ -2,6 +2,7 @@ package dev.br0b.waylandfix.mixin;
 
 import com.mojang.blaze3d.platform.TextInputManager;
 import dev.br0b.waylandfix.input.PreeditResettable;
+import dev.br0b.waylandfix.input.TextInputFocusOwner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,13 +16,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
-public final class MinecraftMixin {
+public final class MinecraftMixin implements TextInputFocusOwner {
     @Shadow
     @Final
     private TextInputManager textInputManager;
 
     @Unique
     private GuiEventListener waylandfix$textFocusOwner;
+
+    @Override
+    public GuiEventListener waylandfix$getTextInputFocusOwner() {
+        return waylandfix$textFocusOwner;
+    }
 
     @Inject(method = "<init>", at = @At("HEAD"))
     private static void waylandfix$setPlatformHint(CallbackInfo callback) {
