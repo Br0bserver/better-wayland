@@ -30,10 +30,11 @@ The failures addressed by the project fall into separate layers:
   coordinates directly to GLFW. WaylandFix converts the text-input rectangle to
   logical surface coordinates and keeps the native candidate window while
   suppressing Minecraft's duplicate floating preedit box.
-- **IME control-key leakage:** while native preedit text is nonempty, WaylandFix
-  prevents IME editing and navigation keys from also reaching the active
-  Minecraft text widget. Suppressed press, repeat, and release events are paired
-  so composition changes cannot leave a key stuck.
+- **IME control-key leakage:** when an unmodified text key is consumed by the
+  Linux IME without producing Minecraft's matching character callback,
+  WaylandFix prevents the following IME editing/navigation key from also
+  reaching the active text widget. English input resets the correlation as soon
+  as its normal character callback arrives.
 - **Stuck keys:** a focus loss during pointer-lock changes can omit release
   events. Wayland focus loss now releases Minecraft's key mappings.
 - **Cursor and event-loop behavior:** the native patchset covers cursor-warp
@@ -66,8 +67,9 @@ text visible.
 
 The upstream patch that globally drops Ctrl/Alt characters is intentionally not
 included: it breaks AltGr and IME layouts. WaylandFix instead isolates only
-specific editing/navigation keys while native preedit is active; letters,
-modifiers, AltGr, and normal shortcut handling remain untouched.
+specific editing/navigation keys after detecting a key/character callback
+mismatch; letters, modifiers, AltGr, and normal shortcut handling remain
+untouched.
 
 ## Build
 

@@ -37,13 +37,14 @@ public final class KeyboardHandlerMixin {
                     || minecraft.options.keyCommand.matches(event);
             waylandfix$input.observeGameplayKey(event.key(), action, opensTextScreen);
             if (isWaylandWindow) {
-                waylandfix$preeditKeys.updatePreedit(null);
+                waylandfix$preeditKeys.observePreedit(null);
             }
         } else {
             waylandfix$input.clear();
         }
 
-        if (isWaylandWindow && waylandfix$preeditKeys.shouldSuppress(event.key(), action)) {
+        if (isWaylandWindow
+                && waylandfix$preeditKeys.shouldSuppress(event.key(), action, event.modifiers())) {
             callback.cancel();
         }
     }
@@ -52,12 +53,13 @@ public final class KeyboardHandlerMixin {
     private void waylandfix$trackPreedit(long window, PreeditEvent event, CallbackInfo callback) {
         if (window == minecraft.getWindow().handle()
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
-            waylandfix$preeditKeys.updatePreedit(event.fullText());
+            waylandfix$preeditKeys.observePreedit(event.fullText());
         }
     }
 
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     private void waylandfix$dropOpeningCharacter(long window, CharacterEvent event, CallbackInfo callback) {
+        waylandfix$preeditKeys.observeCharacter();
         if (waylandfix$input.consumeOpeningCharacter(event.codepoint())) {
             callback.cancel();
         }

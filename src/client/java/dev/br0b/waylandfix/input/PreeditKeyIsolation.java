@@ -8,15 +8,25 @@ import static org.lwjgl.glfw.GLFW.*;
 /** Prevents native IME control keys from leaking into Minecraft while composing text. */
 public final class PreeditKeyIsolation {
     private final Set<Integer> suppressedKeys = new HashSet<>();
-    private boolean preeditActive;
+    private boolean awaitingCharacter;
 
-    public void updatePreedit(String text) {
-        preeditActive = text != null && !text.isEmpty();
+    public void observeCharacter() {
+        awaitingCharacter = false;
     }
 
-    public boolean shouldSuppress(int key, int action) {
+    public void observePreedit(String text) {
+        if (text == null || text.isEmpty()) {
+            awaitingCharacter = false;
+        }
+    }
+
+    public boolean shouldSuppress(int key, int action, int modifiers) {
         if (action == GLFW_RELEASE) {
             return suppressedKeys.remove(key);
+        }
+        if (isImeTextKey(key) && action != GLFW_RELEASE && !hasCommandModifier(modifiers)) {
+            awaitingCharacter = true;
+            return false;
         }
         if (!isImeControlKey(key)) {
             return false;
@@ -27,7 +37,7 @@ public final class PreeditKeyIsolation {
         if (action != GLFW_PRESS) {
             return false;
         }
-        if (!preeditActive) {
+        if (!awaitingCharacter) {
             // A missing release (for example while a screen closes) must not
             // poison the next physical press of the same key.
             suppressedKeys.remove(key);
@@ -35,7 +45,18 @@ public final class PreeditKeyIsolation {
         }
 
         suppressedKeys.add(key);
+        if (key == GLFW_KEY_ESCAPE) {
+            awaitingCharacter = false;
+        }
         return true;
+    }
+
+    private static boolean isImeTextKey(int key) {
+        return key >= GLFW_KEY_A && key <= GLFW_KEY_Z;
+    }
+
+    private static boolean hasCommandModifier(int modifiers) {
+        return (modifiers & (GLFW_MOD_CONTROL | GLFW_MOD_ALT | GLFW_MOD_SUPER)) != 0;
     }
 
     private static boolean isImeControlKey(int key) {
