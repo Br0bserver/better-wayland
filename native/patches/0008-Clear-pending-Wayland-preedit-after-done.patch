@@ -1,0 +1,18 @@
+diff --git a/src/wl_window.c b/src/wl_window.c
+index 906f0f7d..8e1d1c31 100644
+--- a/src/wl_window.c
++++ b/src/wl_window.c
+@@ -2548,4 +2548,13 @@ static void textInputV3Done(void* data,
+     _GLFWwindow* window = (_GLFWwindow*) data;
+     _glfwUpdatePreeditCursorRectangleWayland(window);
+     _glfwInputPreedit(window);
++
++    // text-input-v3 state is transactional: a preedit string not supplied in
++    // the next commit is no longer present. Clear only the pending GLFW state
++    // after notifying the application, so commit-only batches cannot leave a
++    // stale preedit visible in the client.
++    window->preedit.textCount = 0;
++    window->preedit.blockSizesCount = 0;
++    window->preedit.focusedBlockIndex = 0;
++    window->preedit.caretIndex = 0;
+ }

@@ -1,0 +1,13 @@
+.gradle/
+.gradle-user/
+build/
+run/
+out/
+logs/
+*.iml
+.idea/
+native/glfw/
+native/glfw-wayland-patches/
+native/.cache/
+src/main/resources/natives/
+!src/main/resources/natives/.gitkeep

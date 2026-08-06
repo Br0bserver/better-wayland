@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            binutils cmake ninja-build pkg-config \
+            libegl1-mesa-dev libgl1-mesa-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Build bundled GLFW and Fabric jar
+        env:
+          GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user
+        run: ./gradlew bundleNative build
+      - name: Verify native manifest and exports
+        run: |
+          test -s src/main/resources/natives/linux-x86_64/libglfw.so
+          test -s src/main/resources/natives/linux-x86_64/libglfw.so.sha256
+          test -s src/main/resources/natives/linux-x86_64/libglfw.manifest
+          while read -r symbol; do
+            readelf --dyn-syms --wide src/main/resources/natives/linux-x86_64/libglfw.so \
+              | awk -v wanted="$symbol" '$8 == wanted { found = 1 } END { exit found ? 0 : 1 }'
+          done < <(printf '%s\n' glfwSetPreeditCallback glfwSetIMEStatusCallback glfwSetPreeditCandidateCallback)
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: waylandfix-${{ github.sha }}
+          path: build/libs/*.jar

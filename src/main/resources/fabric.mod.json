@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "waylandfix",
+  "version": "${version}",
+  "name": "WaylandFix",
+  "description": "Native GLFW Wayland compatibility fixes for Minecraft 26.1.2.",
+  "authors": ["br0b"],
+  "contact": {
+    "sources": "https://github.com/Br0bserver/wayland-fix-mod"
+  },
+  "license": "LGPL-3.0-or-later",
+  "environment": "client",
+  "entrypoints": {
+    "preLaunch": ["dev.br0b.waylandfix.bootstrap.NativeBootstrap"],
+    "client": ["dev.br0b.waylandfix.WaylandFixClient"]
+  },
+  "mixins": ["waylandfix.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": "=26.1.2",
+    "java": ">=25"
+  },
+  "breaks": {
+    "fullscreenfix": "*"
+  }
+}
