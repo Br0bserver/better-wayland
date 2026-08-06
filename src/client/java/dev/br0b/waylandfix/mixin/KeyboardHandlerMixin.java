@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.PreeditEvent;
+import net.minecraft.client.gui.screens.Screen;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,6 +41,15 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
     @Shadow
     private PreeditEvent lastPreeditEvent;
 
+    @Unique
+    private Screen waylandfix$currentScreen() {
+        //#if MC >= 260200
+        //$$ return minecraft.gui.screen();
+        //#else
+        return minecraft.screen;
+        //#endif
+    }
+
     @Override
     public void waylandfix$resetPreedit() {
         lastPreeditEvent = null;
@@ -49,8 +59,8 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
 
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void waylandfix$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
-        Object currentScreen = minecraft.screen;
-        Object currentFocus = currentScreen == null ? null : minecraft.screen.getFocused();
+        Screen currentScreen = waylandfix$currentScreen();
+        Object currentFocus = currentScreen == null ? null : currentScreen.getFocused();
         if (currentScreen != waylandfix$lastScreen || currentFocus != waylandfix$lastFocus) {
             waylandfix$input.clear();
             waylandfix$preeditKeys.reset();
@@ -60,7 +70,7 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
 
         boolean isWaylandWindow = window == minecraft.getWindow().handle()
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND;
-        if (minecraft.screen == null) {
+        if (currentScreen == null) {
             boolean opensTextScreen = minecraft.options.keyChat.matches(event)
                     || minecraft.options.keyCommand.matches(event);
             waylandfix$input.observeGameplayKey(event.key(), action, opensTextScreen);

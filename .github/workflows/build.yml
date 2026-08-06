@@ -26,7 +26,7 @@ jobs:
       - name: Build bundled GLFW and Fabric jar
         env:
           GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user
-        run: ./gradlew bundleNative build
+        run: ./gradlew bundleNative buildAllVersions
       - name: Verify native manifest and exports
         run: |
           test -s src/main/resources/natives/linux-x86_64/libglfw.so
@@ -40,4 +40,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waylandfix-${{ github.sha }}
-          path: build/libs/*.jar
+          path: versions/*/build/libs/*.jar
+          if-no-files-found: error

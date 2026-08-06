@@ -3,7 +3,7 @@
   "id": "waylandfix",
   "version": "${version}",
   "name": "WaylandFix",
-  "description": "Native GLFW Wayland compatibility fixes for Minecraft 26.1.2.",
+  "description": "Native GLFW Wayland compatibility fixes for Minecraft ${minecraft_version}.",
   "authors": ["br0b"],
   "contact": {
     "sources": "https://github.com/Br0bserver/wayland-fix-mod"
@@ -17,7 +17,7 @@
   "mixins": ["waylandfix.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.2",
-    "minecraft": "=26.1.2",
+    "minecraft": "=${minecraft_version}",
     "java": ">=25"
   },
   "breaks": {

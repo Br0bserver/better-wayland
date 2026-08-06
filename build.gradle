@@ -1,77 +1,26 @@
+import com.replaymod.gradle.preprocess.Node
+
 plugins {
-    id "net.fabricmc.fabric-loom" version "${loom_version}"
-    id "maven-publish"
+    id "net.fabricmc.fabric-loom" version "${loom_version}" apply false
+    id "com.replaymod.preprocess" version "${preprocessor_version}"
 }
 
-version = project.mod_version
-group = project.maven_group
-
-base {
-    archivesName = project.archives_base_name
+preprocess {
+    mainProjectFile = "versions/mainProject"
 }
 
-repositories {
-    mavenCentral()
-}
-
-loom {
-    splitEnvironmentSourceSets()
-
-    mods {
-        waylandfix {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
-        }
-    }
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-
-    testImplementation platform("org.junit:junit-bom:5.13.4")
-    testImplementation "org.junit.jupiter:junit-jupiter"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-}
-
-processResources {
-    inputs.property "version", project.version
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.release = 25
-}
-
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
-}
+Node mc2612 = preprocess.createNode("26.1.2-fabric", 260102, "")
+Node mc262 = preprocess.createNode("26.2-fabric", 260200, "")
+mc2612.link(mc262, null)
 
 tasks.register("bundleNative", Exec) {
     group = "build"
     description = "Builds and embeds the pinned x86_64 GLFW Wayland native."
-    commandLine "bash", project.file("native/build-glfw.sh")
+    commandLine "bash", file("native/build-glfw.sh")
 }
 
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.name}" }
-    }
-}
-
-publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            from components.java
-        }
-    }
+tasks.register("buildAllVersions") {
+    group = "build"
+    description = "Builds every configured Minecraft version."
+    dependsOn(":26.1.2-fabric:build", ":26.2-fabric:build")
 }

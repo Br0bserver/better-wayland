@@ -29,18 +29,26 @@ public final class MinecraftMixin implements TextInputFocusOwner {
         return waylandfix$textFocusOwner;
     }
 
-    @Inject(method = "<init>", at = @At("HEAD"))
-    private static void waylandfix$setPlatformHint(CallbackInfo callback) {
-        GLFW.glfwInitHint(GLFW.GLFW_PLATFORM, GLFW.GLFW_PLATFORM_WAYLAND);
-    }
-
-    @Inject(method = "setScreen", at = @At("HEAD"))
-    private void waylandfix$clearTextFocusOnScreenChange(Screen screen, CallbackInfo callback) {
+    @Override
+    public void waylandfix$clearTextInputFocus() {
         waylandfix$textFocusOwner = null;
         if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
             textInputManager.stopTextInput();
         }
     }
+
+    @Inject(method = "<init>", at = @At("HEAD"))
+    private static void waylandfix$setPlatformHint(CallbackInfo callback) {
+        GLFW.glfwInitHint(GLFW.GLFW_PLATFORM, GLFW.GLFW_PLATFORM_WAYLAND);
+    }
+
+    //#if MC >= 260200
+    //#else
+    @Inject(method = "setScreen", at = @At("HEAD"))
+    private void waylandfix$clearTextFocusOnScreenChange(Screen screen, CallbackInfo callback) {
+        waylandfix$clearTextInputFocus();
+    }
+    //#endif
 
     @Inject(method = "onTextInputFocusChange", at = @At("HEAD"))
     private void waylandfix$resetNativePreedit(

@@ -10,7 +10,8 @@
     "WindowMixin",
     "KeyboardHandlerMixin",
     "TextInputManagerMixin",
-    "IMEPreeditOverlayMixin"
+    "IMEPreeditOverlayMixin",
+    "GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
