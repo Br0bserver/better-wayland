@@ -94,6 +94,9 @@ jar {
     from(rootProject.file("LICENSE")) {
         rename { "${it}_${project.name}" }
     }
+    from(rootProject.file("LICENSES/GPL-3.0-only.txt")) {
+        rename { "GPL-3.0_${project.name}.txt" }
+    }
     from(rootProject.file("THIRD_PARTY_NOTICES.md")) {
         rename { "${it}_${project.name}" }
     }
