@@ -91,9 +91,12 @@ public abstract class WindowMixin {
         }
     }
 
-    @Inject(method = "setIcon", at = @At("HEAD"), cancellable = false)
-    private void betterwayland$keepIconPath(PackResources resources, com.mojang.blaze3d.platform.IconSet iconSet, CallbackInfo callback) {
-        // Native GLFW 3.4.1 accepts the normal Minecraft icon path. This hook is
-        // intentionally observational until xdg_toplevel_icon support is selected.
+    @Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
+    private void betterwayland$skipUnsupportedWindowIcon(PackResources resources, com.mojang.blaze3d.platform.IconSet iconSet, CallbackInfo callback) {
+        // Wayland compositors resolve application icons from the desktop entry;
+        // glfwSetWindowIcon is unsupported and raises GLFW_PLATFORM_ERROR.
+        if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
+            callback.cancel();
+        }
     }
 }

@@ -41,7 +41,8 @@ replace GLFW with SDL.
 
 ## Compatibility
 
-- Requires Fabric Loader 0.19.2 or newer.
+- Minecraft 1.20.x-1.21.x builds require Fabric Loader 0.14.21 or newer;
+  26.x builds require 0.19.2 or newer.
 - Supports Linux x86_64 Wayland sessions. Do not configure an external GLFW
   override while using the bundled native.
 - Intentionally incompatible with BorderlessFullscreen/FullscreenFix

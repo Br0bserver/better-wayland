@@ -58,11 +58,13 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.property('dependencies.minecraft_version')
     inputs.property "minecraft_dependency", project.property('minecraft_dependency')
+    inputs.property "loader_dependency", project.property('loader_dependency')
     inputs.property "java_version", javaVersion
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.property('dependencies.minecraft_version'),
                 "minecraft_dependency": project.property('minecraft_dependency'),
+                "loader_dependency": project.property('loader_dependency'),
                 "java_version": javaVersion
     }
     filesMatching("betterwayland.mixins.json") {
