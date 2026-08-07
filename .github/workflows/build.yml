@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    env:
-      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user
     steps:
       - uses: actions/checkout@v7
       - name: Set up Java 25
