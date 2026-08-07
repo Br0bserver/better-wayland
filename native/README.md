@@ -10,7 +10,7 @@ On Debian/Ubuntu, install CMake, Ninja, Wayland, xkbcommon, Wayland protocols,
 X11 development headers, and OpenGL development headers. Then run:
 
 ```sh
-./gradlew bundleNative build
+./gradlew bundleNative buildAllVersions
 ```
 
 The script uses ignored repository caches and a fresh temporary worktree on
@@ -24,4 +24,5 @@ focus between text widgets, so the compositor cannot carry a candidate window
 from the old widget into the new one. Patch 0010 connects GLFW's IME input mode
 to Wayland text-input enable/disable transactions, keeping fcitx/IBus detached
 while Minecraft has no active text field.
-Release CI must run this task before assembling a beta jar.
+Release CI must run this task before assembling beta jars. The native output is
+shared by all version projects under `versions/`.

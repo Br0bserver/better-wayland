@@ -26,10 +26,10 @@ fi
 if ! git -C "${patch_cache}" cat-file -e "${patch_commit}^{commit}" 2>/dev/null; then
   git -C "${patch_cache}" fetch --depth 1 origin "${patch_commit}"
 fi
-git -C "${glfw_cache}" update-ref refs/waylandfix/glfw "${glfw_commit}"
-git -C "${patch_cache}" update-ref refs/waylandfix/patches "${patch_commit}"
+git -C "${glfw_cache}" update-ref refs/betterwayland/glfw "${glfw_commit}"
+git -C "${patch_cache}" update-ref refs/betterwayland/patches "${patch_commit}"
 
-work_dir="$(mktemp -d "${TMPDIR:-/tmp}/waylandfix-glfw.XXXXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/betterwayland-glfw.XXXXXXXX")"
 cleanup() {
   git -C "${glfw_cache}" worktree remove --force "${work_dir}/glfw" >/dev/null 2>&1 || true
   git -C "${patch_cache}" worktree remove --force "${work_dir}/patches" >/dev/null 2>&1 || true
@@ -44,7 +44,7 @@ git -C "${patch_cache}" worktree add --detach "${work_dir}/patches" "${patch_com
 # 26.1.2 uses the plain char callback, so Java-side correlation handles only
 # consumed shortcuts/opening keys. Apply the remaining native fixes.
 git -C "${work_dir}/glfw" \
-  -c user.name=WaylandFix -c user.email=waylandfix@invalid \
+  -c user.name=BetterWayland -c user.email=betterwayland@invalid \
   am \
   "${work_dir}/patches/0002-Implement-glfwSetCursorPos-with-fallback-for-older-c.patch" \
   "${work_dir}/patches/0003-Fix-window-size-callback-not-firing-on-unset-fullscr.patch" \
@@ -64,11 +64,11 @@ awk 'NR >= 1376 && NR <= 1383 {
 git -C "${work_dir}/glfw" apply --whitespace=nowarn "${work_dir}/patch5.mbox"
 git -C "${work_dir}/glfw" add -A
 git -C "${work_dir}/glfw" \
-  -c user.name=WaylandFix -c user.email=waylandfix@invalid \
+  -c user.name=BetterWayland -c user.email=betterwayland@invalid \
   commit -m "Apply cursor shape protocol compatibility" >/dev/null
 
 git -C "${work_dir}/glfw" \
-  -c user.name=WaylandFix -c user.email=waylandfix@invalid \
+  -c user.name=BetterWayland -c user.email=betterwayland@invalid \
   am \
   "${work_dir}/patches/0006-Add-GLFW_FORCE_WAYLAND-env-var-to-override-app-reque.patch" \
   "${work_dir}/patches/0007-Add-GLFW_USE_LEGACY_CURSOR_WARP-env-var-to-opt-out-o.patch"

@@ -1,12 +1,45 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         maven {
             name = "Fabric"
             url = "https://maven.fabricmc.net/"
         }
         mavenCentral()
         gradlePluginPortal()
+        maven {
+            name = "Jitpack"
+            url = "https://jitpack.io"
+        }
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.replaymod.preprocess") {
+                useModule("com.github.Fallen-Breath:preprocessor:${requested.version}")
+            }
+        }
     }
 }
 
-rootProject.name = "wayland-fix-mod"
+rootProject.name = "better-wayland"
+
+[
+        "1.20.1-fabric",
+        "1.20.4-fabric",
+        "1.20.6-fabric",
+        "1.21.1-fabric",
+        "1.21.3-fabric",
+        "1.21.4-fabric",
+        "1.21.5-fabric",
+        "1.21.8-fabric",
+        "1.21.10-fabric",
+        "1.21.11-fabric",
+        "26.1.2-fabric",
+        "26.2-fabric"
+].each { versionName ->
+    include(":${versionName}")
+    ProjectDescriptor versionProject = project(":${versionName}")
+    versionProject.projectDir = file("versions/${versionName}")
+    versionProject.buildFileName = "../../common.gradle"
+}
