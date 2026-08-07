@@ -94,6 +94,9 @@ jar {
     from(rootProject.file("LICENSE")) {
         rename { "${it}_${project.name}" }
     }
+    from(rootProject.file("THIRD_PARTY_NOTICES.md")) {
+        rename { "${it}_${project.name}" }
+    }
 }
 
 publishing {
