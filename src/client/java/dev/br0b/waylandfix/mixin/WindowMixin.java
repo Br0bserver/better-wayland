@@ -1,20 +1,28 @@
 package dev.br0b.waylandfix.mixin;
 
 import com.mojang.blaze3d.platform.Window;
+//#if MC >= 260100
 import com.mojang.blaze3d.systems.GpuBackend;
+//#endif
 import net.minecraft.client.KeyMapping;
 import net.minecraft.server.packs.PackResources;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+//#if MC >= 260100
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+//#endif
 
 @Mixin(Window.class)
 public abstract class WindowMixin {
+    @Unique
+    private static final int waylandfix$waylandAppIdHint = 0x00026001;
+
     @Shadow
     @Final
     private long handle;
@@ -31,11 +39,24 @@ public abstract class WindowMixin {
     @Shadow
     public abstract void setHeight(int height);
 
+    //#if MC >= 260100
     @Inject(method = "createGlfwWindow", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuBackend;setWindowHints()V", shift = At.Shift.AFTER, remap = false))
     private static void waylandfix$setHints(int width, int height, String title, long monitor, GpuBackend backend, CallbackInfoReturnable<Long> callback) {
         GLFW.glfwWindowHint(GLFW.GLFW_FOCUS_ON_SHOW, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHintString(GLFW.GLFW_WAYLAND_APP_ID, "minecraft");
+        GLFW.glfwWindowHintString(waylandfix$waylandAppIdHint, "minecraft");
     }
+    //#else
+    //$$ @Inject(
+    //$$         method = "<init>",
+    //$$         at = @At(
+    //$$                 value = "INVOKE",
+    //$$                 target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J",
+    //$$                 remap = false))
+    //$$ private void waylandfix$setHints(CallbackInfo callback) {
+    //$$     GLFW.glfwWindowHint(GLFW.GLFW_FOCUS_ON_SHOW, GLFW.GLFW_FALSE);
+    //$$     GLFW.glfwWindowHintString(waylandfix$waylandAppIdHint, "minecraft");
+    //$$ }
+    //#endif
 
     @Inject(method = "setMode", at = @At("RETURN"))
     private void waylandfix$reconcileWaylandSizes(CallbackInfo callback) {
@@ -45,7 +66,7 @@ public abstract class WindowMixin {
 
         int[] windowWidth = new int[1];
         int[] windowHeight = new int[1];
-        GLFW.glfwGetWindowSize(handle, windowWidth, windowHeight);
+        GLFW.glfwGetWindowSize(this.handle, windowWidth, windowHeight);
         if (windowWidth[0] > 0 && windowHeight[0] > 0) {
             setWidth(windowWidth[0]);
             setHeight(windowHeight[0]);
@@ -53,7 +74,7 @@ public abstract class WindowMixin {
 
         int[] framebufferWidth = new int[1];
         int[] framebufferHeight = new int[1];
-        GLFW.glfwGetFramebufferSize(handle, framebufferWidth, framebufferHeight);
+        GLFW.glfwGetFramebufferSize(this.handle, framebufferWidth, framebufferHeight);
         if (framebufferWidth[0] > 0 && framebufferHeight[0] > 0) {
             this.framebufferWidth = framebufferWidth[0];
             this.framebufferHeight = framebufferHeight[0];
@@ -62,7 +83,7 @@ public abstract class WindowMixin {
 
     @Inject(method = "onFocus", at = @At("TAIL"))
     private void waylandfix$releaseKeysOnFocusLoss(long callbackWindow, boolean focused, CallbackInfo callback) {
-        if (!focused && callbackWindow == handle
+        if (!focused && callbackWindow == this.handle
                 && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
             // Wayland compositors may cancel a pointer-lock transition without
             // delivering releases for keys held during the transition.

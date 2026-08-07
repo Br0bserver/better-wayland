@@ -2,7 +2,8 @@ plugins {
     id "maven-publish"
 }
 
-apply plugin: "net.fabricmc.fabric-loom"
+boolean obfuscatedMinecraft = !project.property('dependencies.minecraft_version').toString().startsWith('26.')
+apply plugin: obfuscatedMinecraft ? "net.fabricmc.fabric-loom-remap" : "net.fabricmc.fabric-loom"
 apply plugin: "com.replaymod.preprocess"
 
 int mcVersion = 0
@@ -10,6 +11,8 @@ preprocess {
     mcVersion = vars.get().get("MC")
     vars.put("MC", mcVersion)
 }
+
+int javaVersion = project.property('java_version') as int
 
 version = project.mod_version
 group = project.maven_group
@@ -35,8 +38,16 @@ loom {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.property('dependencies.minecraft_version')}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.property('fabric_api_version')}"
+    if (mcVersion < 260000) {
+        mappings loom.layered {
+            officialMojangMappings()
+        }
+    }
+    if (obfuscatedMinecraft) {
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    } else {
+        implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    }
 
     testImplementation platform("org.junit:junit-bom:5.13.4")
     testImplementation "org.junit.jupiter:junit-jupiter"
@@ -47,15 +58,26 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.property('dependencies.minecraft_version')
     inputs.property "minecraft_dependency", project.property('minecraft_dependency')
+    inputs.property "java_version", javaVersion
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.property('dependencies.minecraft_version'),
-                "minecraft_dependency": project.property('minecraft_dependency')
+                "minecraft_dependency": project.property('minecraft_dependency'),
+                "java_version": javaVersion
+    }
+    filesMatching("waylandfix.mixins.json") {
+        expand "java_version": javaVersion,
+                "platform_preference_mixin": mcVersion >= 260100
+                        ? ',\n    "SharedConstantsMixin"'
+                        : '',
+                "text_input_mixins": mcVersion >= 260100
+                        ? ',\n    "MinecraftTextInputMixin",\n    "KeyboardPreeditMixin",\n    "TextInputManagerMixin",\n    "IMEPreeditOverlayMixin",\n    "GuiMixin"'
+                        : ''
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 25
+    options.release = javaVersion
 }
 
 tasks.withType(Test).configureEach {
@@ -64,8 +86,8 @@ tasks.withType(Test).configureEach {
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
 }
 
 jar {

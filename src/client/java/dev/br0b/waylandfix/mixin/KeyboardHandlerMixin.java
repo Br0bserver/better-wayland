@@ -1,17 +1,14 @@
 package dev.br0b.waylandfix.mixin;
 
 import dev.br0b.waylandfix.input.InputSuppression;
-import dev.br0b.waylandfix.input.PreeditKeyIsolation;
-import dev.br0b.waylandfix.input.PreeditResettable;
-import dev.br0b.waylandfix.input.TextInputFocusOwner;
+import dev.br0b.waylandfix.input.InputResettable;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+//#if MC >= 12110
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.PreeditEvent;
+//#endif
 import net.minecraft.client.gui.screens.Screen;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(KeyboardHandler.class)
-public final class KeyboardHandlerMixin implements PreeditResettable {
+public final class KeyboardHandlerMixin implements InputResettable {
     @Shadow
     @Final
     private Minecraft minecraft;
@@ -30,16 +27,10 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
     private final InputSuppression waylandfix$input = new InputSuppression();
 
     @Unique
-    private final PreeditKeyIsolation waylandfix$preeditKeys = new PreeditKeyIsolation();
-
-    @Unique
     private Object waylandfix$lastScreen;
 
     @Unique
     private Object waylandfix$lastFocus;
-
-    @Shadow
-    private PreeditEvent lastPreeditEvent;
 
     @Unique
     private Screen waylandfix$currentScreen() {
@@ -51,61 +42,58 @@ public final class KeyboardHandlerMixin implements PreeditResettable {
     }
 
     @Override
-    public void waylandfix$resetPreedit() {
-        lastPreeditEvent = null;
+    public void waylandfix$resetInput() {
         waylandfix$input.clear();
-        waylandfix$preeditKeys.reset();
     }
 
-    @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
+    //#if MC >= 12110
+    @Inject(method = "keyPress", at = @At("HEAD"), order = 800)
     private void waylandfix$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
+        boolean opensTextScreen = minecraft.options.keyChat.matches(event)
+                || minecraft.options.keyCommand.matches(event);
+        waylandfix$observeKeyState(event.key(), action, opensTextScreen);
+    }
+    //#else
+    //$$ @Inject(method = "keyPress", at = @At("HEAD"), order = 800)
+    //$$ private void waylandfix$observeKey(
+    //$$         long window, int key, int scanCode, int action, int modifiers, CallbackInfo callback) {
+    //$$     boolean opensTextScreen = minecraft.options.keyChat.matches(key, scanCode)
+    //$$             || minecraft.options.keyCommand.matches(key, scanCode);
+    //$$     waylandfix$observeKeyState(key, action, opensTextScreen);
+    //$$ }
+    //#endif
+
+    @Unique
+    private void waylandfix$observeKeyState(int key, int action, boolean opensTextScreen) {
         Screen currentScreen = waylandfix$currentScreen();
         Object currentFocus = currentScreen == null ? null : currentScreen.getFocused();
         if (currentScreen != waylandfix$lastScreen || currentFocus != waylandfix$lastFocus) {
             waylandfix$input.clear();
-            waylandfix$preeditKeys.reset();
             waylandfix$lastScreen = currentScreen;
             waylandfix$lastFocus = currentFocus;
         }
 
-        boolean isWaylandWindow = window == minecraft.getWindow().handle()
-                && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND;
         if (currentScreen == null) {
-            boolean opensTextScreen = minecraft.options.keyChat.matches(event)
-                    || minecraft.options.keyCommand.matches(event);
-            waylandfix$input.observeGameplayKey(event.key(), action, opensTextScreen);
-            if (isWaylandWindow) {
-                waylandfix$preeditKeys.observePreedit(null);
-            }
+            waylandfix$input.observeGameplayKey(key, action, opensTextScreen);
         } else {
             waylandfix$input.clear();
         }
-
-        if (isWaylandWindow
-                && waylandfix$preeditKeys.shouldSuppress(event.key(), action, event.modifiers())) {
-            callback.cancel();
-        }
     }
 
-    @Inject(method = "preeditCallback", at = @At("HEAD"), cancellable = true)
-    private void waylandfix$trackPreedit(long window, PreeditEvent event, CallbackInfo callback) {
-        if (window == minecraft.getWindow().handle()
-                && GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
-            waylandfix$preeditKeys.observePreedit(event == null ? null : event.fullText());
-            GuiEventListener focusOwner = ((TextInputFocusOwner) minecraft).waylandfix$getTextInputFocusOwner();
-            if (focusOwner != null) {
-                lastPreeditEvent = event;
-                KeyboardHandler.submitPreeditEvent(focusOwner, event);
-                callback.cancel();
-            }
-        }
-    }
-
+    //#if MC >= 12110
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, order = 900)
     private void waylandfix$dropOpeningCharacter(long window, CharacterEvent event, CallbackInfo callback) {
-        waylandfix$preeditKeys.observeCharacter();
         if (waylandfix$input.consumeOpeningCharacter(event.codepoint())) {
             callback.cancel();
         }
     }
+    //#else
+    //$$ @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, order = 900)
+    //$$ private void waylandfix$dropOpeningCharacter(
+    //$$         long window, int codePoint, int modifiers, CallbackInfo callback) {
+    //$$     if (waylandfix$input.consumeOpeningCharacter(codePoint)) {
+    //$$         callback.cancel();
+    //$$     }
+    //$$ }
+    //#endif
 }

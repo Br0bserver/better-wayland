@@ -2,16 +2,12 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.br0b.waylandfix.mixin",
-  "compatibilityLevel": "JAVA_25",
+  "compatibilityLevel": "JAVA_${java_version}",
   "client": [
     "GLFWMixin",
-    "MinecraftMixin",
-    "SharedConstantsMixin",
+    "MinecraftMixin"${platform_preference_mixin},
     "WindowMixin",
-    "KeyboardHandlerMixin",
-    "TextInputManagerMixin",
-    "IMEPreeditOverlayMixin",
-    "GuiMixin"
+    "KeyboardHandlerMixin"${text_input_mixins}
   ],
   "injectors": {
     "defaultRequire": 1

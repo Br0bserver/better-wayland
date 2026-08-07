@@ -1,3 +1,4 @@
+//#if MC >= 260100
 package dev.br0b.waylandfix.mixin;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -41,3 +42,4 @@ public abstract class IMEPreeditOverlayMixin {
         callbackInfo.cancel();
     }
 }
+//#endif

@@ -1,3 +1,4 @@
+//#if MC >= 260100
 package dev.br0b.waylandfix.mixin;
 
 import dev.br0b.waylandfix.input.TextInputFocusOwner;
@@ -24,3 +25,4 @@ public final class GuiMixin {
     //$$ }
     //#endif
 }
+//#endif

@@ -24,7 +24,20 @@ pluginManagement {
 
 rootProject.name = "wayland-fix-mod"
 
-["26.1.2-fabric", "26.2-fabric"].each { versionName ->
+[
+        "1.20.1-fabric",
+        "1.20.4-fabric",
+        "1.20.6-fabric",
+        "1.21.1-fabric",
+        "1.21.3-fabric",
+        "1.21.4-fabric",
+        "1.21.5-fabric",
+        "1.21.8-fabric",
+        "1.21.10-fabric",
+        "1.21.11-fabric",
+        "26.1.2-fabric",
+        "26.2-fabric"
+].each { versionName ->
     include(":${versionName}")
     ProjectDescriptor versionProject = project(":${versionName}")
     versionProject.projectDir = file("versions/${versionName}")

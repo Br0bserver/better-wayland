@@ -1,3 +1,4 @@
+//#if MC >= 260100
 package dev.br0b.waylandfix.mixin;
 
 import com.mojang.blaze3d.platform.TextInputManager;
@@ -78,3 +79,4 @@ public abstract class TextInputManagerMixin {
         callbackInfo.cancel();
     }
 }
+//#endif

@@ -1,10 +1,31 @@
 # WaylandFix
 
-WaylandFix is a client-only Fabric mod for Minecraft 26.1.x
-(`26.1`, `26.1.1`, and `26.1.2`) and 26.2. It keeps GLFW as the window/input
-backend and targets native Wayland compatibility without an SDL replacement.
-The `v0.1.0-beta.2` release is the tested 26.1.2 baseline; ongoing
-cross-version work is developed on `dev`.
+WaylandFix is a client-only Fabric mod for selected Minecraft releases from
+1.20 through 26.2. It keeps GLFW as the window/input backend and targets native
+Wayland compatibility without an SDL replacement. The `v0.1.0-beta.2` release
+is the tested 26.1.2 baseline; ongoing cross-version work is developed on
+`dev`.
+
+Artifacts are grouped by Minecraft protocol version. Each build node targets
+the newest release in its protocol group and declares only the releases that
+share that protocol:
+
+| Protocol | Build target | Declared Minecraft versions |
+| ---: | --- | --- |
+| 763 | 1.20.1 | 1.20-1.20.1 |
+| 765 | 1.20.4 | 1.20.3-1.20.4 |
+| 766 | 1.20.6 | 1.20.5-1.20.6 |
+| 767 | 1.21.1 | 1.21-1.21.1 |
+| 768 | 1.21.3 | 1.21.2-1.21.3 |
+| 769 | 1.21.4 | 1.21.4 |
+| 770 | 1.21.5 | 1.21.5 |
+| 772 | 1.21.8 | 1.21.7-1.21.8 |
+| 773 | 1.21.10 | 1.21.9-1.21.10 |
+| 774 | 1.21.11 | 1.21.11 |
+| 775 | 26.1.2 | 26.1.x |
+| 776 | 26.2 | 26.2.x |
+
+Protocols 764 (1.20.2) and 771 (1.21.6) currently have no artifact.
 
 The beta release contains a reproducibly built x86_64 glibc
 `libglfw.so` based on LWJGL-CI/glfw. On a Wayland session, a missing, invalid,
@@ -15,8 +36,9 @@ running a partially fixed configuration.
 
 The failures addressed by the project fall into separate layers:
 
-- **Platform selection:** Minecraft 26.1.2 otherwise prefers X11. The client
-  mixin enables GLFW's Wayland platform before the window is created.
+- **Platform selection:** supported Minecraft releases may otherwise select
+  X11. The client mixin enables GLFW's Wayland platform before the window is
+  created.
 - **Native ABI:** a system GLFW can be ABI-compatible yet still lack LWJGL-CI's
   IME/preedit exports. `KeyboardHandler.setup` resolves those callbacks during
   startup, so the bundled beta verifies and preloads the required symbols.
@@ -31,7 +53,8 @@ The failures addressed by the project fall into separate layers:
 - **IME candidate positioning:** Minecraft passes framebuffer-scaled GUI
   coordinates directly to GLFW. WaylandFix converts the text-input rectangle to
   logical surface coordinates and keeps the native candidate window while
-  suppressing Minecraft's duplicate floating preedit box.
+  suppressing Minecraft's duplicate floating preedit box. This integration is
+  available on 26.x, where Minecraft exposes its native text-input pipeline.
 - **IME control-key leakage:** when an unmodified text key is consumed by the
   Linux IME without producing Minecraft's matching character callback,
   WaylandFix prevents the following IME editing/navigation key from also
@@ -41,11 +64,12 @@ The failures addressed by the project fall into separate layers:
   events. Wayland focus loss now releases Minecraft's key mappings.
 - **IME focus lifetime:** the Java-side IME correlation state is reset when the
   active screen or focused widget changes, so a composition cannot leak into a
-  later screen.
+  later screen. This integration is available on 26.x.
 - **Gameplay IME isolation:** Minecraft's text-input focus now controls the
   Wayland text-input-v3/v1 context. Outside a text field the compositor IME is
   detached, so an IME toggle shortcut cannot turn movement keys into preedit;
   entering chat, search, books, or signs re-enables the existing input method.
+  This integration is available on 26.x.
 - **Cursor and event-loop behavior:** the native patchset covers cursor-warp
   fallback, fullscreen size callbacks, fractional framebuffer rounding, cursor
   shape, and explicit Wayland selection. Event-loop/swap stalls remain native
@@ -98,8 +122,11 @@ Build every configured development target:
 ./gradlew bundleNative buildAllVersions
 ```
 
-The 26.1.2 artifact declares the Fabric-compatible `~26.1-` Minecraft range,
-covering the `26.1` patch line. Jars are written to
-`versions/<version>/build/libs/`. The native task always
+Jars are written to `versions/<version>/build/libs/`. The native task always
 builds once into the shared `src/main/resources/natives/linux-x86_64` resource
-directory and both version projects package that same verified GLFW binary.
+directory and every version project packages that same verified GLFW binary.
+
+Minecraft 1.20.x and 1.21.x receive the GLFW/window, fullscreen, focus, and
+chat-opening character fixes. The 26.x builds additionally contain the native
+IME/preedit, candidate positioning, and text-focus integration because those
+Minecraft and LWJGL Java APIs do not exist in the older releases.

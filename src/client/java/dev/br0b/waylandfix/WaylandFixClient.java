@@ -10,6 +10,6 @@ public final class WaylandFixClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("WaylandFix client layer enabled for Minecraft 26.1.2");
+        LOGGER.info("WaylandFix client layer enabled");
     }
 }

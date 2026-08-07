@@ -2,15 +2,38 @@ import com.replaymod.gradle.preprocess.Node
 
 plugins {
     id "net.fabricmc.fabric-loom" version "${loom_version}" apply false
+    id "net.fabricmc.fabric-loom-remap" version "${loom_version}" apply false
     id "com.replaymod.preprocess" version "${preprocessor_version}"
 }
 
 preprocess {
     mainProjectFile = "versions/mainProject"
+    strictExtraMappings = true
 }
 
+Node mc12001 = preprocess.createNode("1.20.1-fabric", 12001, "")
+Node mc12004 = preprocess.createNode("1.20.4-fabric", 12004, "")
+Node mc12006 = preprocess.createNode("1.20.6-fabric", 12006, "")
+Node mc12101 = preprocess.createNode("1.21.1-fabric", 12101, "")
+Node mc12103 = preprocess.createNode("1.21.3-fabric", 12103, "")
+Node mc12104 = preprocess.createNode("1.21.4-fabric", 12104, "")
+Node mc12105 = preprocess.createNode("1.21.5-fabric", 12105, "")
+Node mc12108 = preprocess.createNode("1.21.8-fabric", 12108, "")
+Node mc12110 = preprocess.createNode("1.21.10-fabric", 12110, "")
+Node mc12111 = preprocess.createNode("1.21.11-fabric", 12111, "")
 Node mc2612 = preprocess.createNode("26.1.2-fabric", 260102, "")
 Node mc262 = preprocess.createNode("26.2-fabric", 260200, "")
+
+mc12001.link(mc12004, null)
+mc12004.link(mc12006, null)
+mc12006.link(mc12101, null)
+mc12101.link(mc12103, null)
+mc12103.link(mc12104, null)
+mc12104.link(mc12105, null)
+mc12105.link(mc12108, null)
+mc12108.link(mc12110, null)
+mc12110.link(mc12111, null)
+mc12111.link(mc2612, null)
 mc2612.link(mc262, null)
 
 tasks.register("bundleNative", Exec) {
@@ -22,5 +45,5 @@ tasks.register("bundleNative", Exec) {
 tasks.register("buildAllVersions") {
     group = "build"
     description = "Builds every configured Minecraft version."
-    dependsOn(":26.1.2-fabric:build", ":26.2-fabric:build")
+    dependsOn(subprojects.collect { "${it.path}:build" })
 }
