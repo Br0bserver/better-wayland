@@ -1,9 +1,10 @@
 # WaylandFix
 
-WaylandFix is a client-only Fabric mod for Minecraft 26.1.2 and 26.2. It keeps
-GLFW as the window/input backend and targets native Wayland compatibility
-without an SDL replacement. The `v0.1.0-beta.2` release is the tested 26.1.2
-baseline; ongoing cross-version work is developed on `dev`.
+WaylandFix is a client-only Fabric mod for Minecraft 26.1.x
+(`26.1`, `26.1.1`, and `26.1.2`) and 26.2. It keeps GLFW as the window/input
+backend and targets native Wayland compatibility without an SDL replacement.
+The `v0.1.0-beta.2` release is the tested 26.1.2 baseline; ongoing
+cross-version work is developed on `dev`.
 
 The beta release contains a reproducibly built x86_64 glibc
 `libglfw.so` based on LWJGL-CI/glfw. On a Wayland session, a missing, invalid,
@@ -97,6 +98,8 @@ Build every configured development target:
 ./gradlew bundleNative buildAllVersions
 ```
 
-Jars are written to `versions/<version>/build/libs/`. The native task always
+The 26.1.2 artifact declares the Fabric-compatible `~26.1-` Minecraft range,
+covering the `26.1` patch line. Jars are written to
+`versions/<version>/build/libs/`. The native task always
 builds once into the shared `src/main/resources/natives/linux-x86_64` resource
 directory and both version projects package that same verified GLFW binary.
