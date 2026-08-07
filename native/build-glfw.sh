@@ -79,6 +79,8 @@ git -C "${work_dir}/glfw" apply \
   "${root_dir}/native/patches/0009-Reset-Wayland-preedit-on-focus-loss.patch"
 git -C "${work_dir}/glfw" apply \
   "${root_dir}/native/patches/0010-Control-Wayland-IME-from-text-focus.patch"
+git -C "${work_dir}/glfw" apply \
+  "${root_dir}/native/patches/0011-Forward-IME-commits-to-char-mods-callback.patch"
 
 cmake -S "${work_dir}/glfw" -B "${work_dir}/build" -G Ninja \
   -DGLFW_BUILD_WAYLAND=ON \
@@ -119,7 +121,7 @@ source=LWJGL-CI/glfw
 sourceCommit=${glfw_commit}
 patches=jdkeke142/glfw-wayland-minecraft
 patchCommit=${patch_commit}
-localPatches=native/patches/0008-Clear-pending-Wayland-preedit-after-done.patch,native/patches/0009-Reset-Wayland-preedit-on-focus-loss.patch,native/patches/0010-Control-Wayland-IME-from-text-focus.patch
+localPatches=native/patches/0008-Clear-pending-Wayland-preedit-after-done.patch,native/patches/0009-Reset-Wayland-preedit-on-focus-loss.patch,native/patches/0010-Control-Wayland-IME-from-text-focus.patch,native/patches/0011-Forward-IME-commits-to-char-mods-callback.patch
 architecture=linux-x86_64
 requiredSymbols=${required_symbols[*]}
 EOF

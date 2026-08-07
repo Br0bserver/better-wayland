@@ -1,0 +1,22 @@
+diff --git a/src/wl_window.c b/src/wl_window.c
+index d5f0818b..f2f49f10 100644
+--- a/src/wl_window.c
++++ b/src/wl_window.c
+@@ -2521,13 +2521,15 @@ static void textInputV3CommitString(void* data,
+ {
+     _GLFWwindow* window = (_GLFWwindow*) data;
+     const char* cur = text;
+ 
+-    if (!window->callbacks.character)
++    if (!window->callbacks.character && !window->callbacks.charmods)
+         return;
+ 
+     while (cur && *cur)
+     {
+         uint32_t codepoint = _glfwDecodeUTF8(&cur);
+-        window->callbacks.character((GLFWwindow*) window, codepoint);
++        _glfwInputChar(window, codepoint, 0, GLFW_TRUE);
+     }
++
++    textInputV3Reset(window);
+ }

@@ -4,8 +4,7 @@
   "package": "dev.br0b.betterwayland.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
   "client": [
-    "GLFWMixin",
-    "MinecraftMixin"${platform_preference_mixin},
+    "GLFWMixin"${platform_preference_mixin}${legacy_text_input_mixins},
     "WindowMixin",
     "KeyboardHandlerMixin"${text_input_mixins}
   ],

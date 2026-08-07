@@ -5,10 +5,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /** GLFW operations which have no meaningful Wayland equivalent. */
 @Mixin(value = GLFW.class, remap = false)
 public abstract class GLFWMixin {
+    @Inject(method = "glfwInit()Z", at = @At("HEAD"))
+    private static void betterwayland$preferWayland(CallbackInfoReturnable<Boolean> callback) {
+        GLFW.glfwInitHint(GLFW.GLFW_PLATFORM, GLFW.GLFW_PLATFORM_WAYLAND);
+    }
+
     @Inject(method = "glfwSetWindowPos(JII)V", at = @At("HEAD"), cancellable = true)
     private static void betterwayland$ignoreUnsupportedWindowPosition(long window, int x, int y, CallbackInfo callback) {
         if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
