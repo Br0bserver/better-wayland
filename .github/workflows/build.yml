@@ -7,10 +7,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: '25'
@@ -24,8 +26,6 @@ jobs:
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
       - name: Build bundled GLFW and Fabric jar
-        env:
-          GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user
         run: ./gradlew bundleNative buildAllVersions
       - name: Verify native manifest and exports
         run: |
@@ -37,8 +37,8 @@ jobs:
               | awk -v wanted="$symbol" '$8 == wanted { found = 1 } END { exit found ? 0 : 1 }'
           done < <(printf '%s\n' glfwSetPreeditCallback glfwSetIMEStatusCallback glfwSetPreeditCandidateCallback)
       - name: Upload jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: waylandfix-${{ github.sha }}
+          name: betterwayland-${{ github.sha }}
           path: versions/*/build/libs/*.jar
           if-no-files-found: error

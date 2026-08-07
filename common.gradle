@@ -29,7 +29,7 @@ loom {
     splitEnvironmentSourceSets()
 
     mods {
-        waylandfix {
+        betterwayland {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
@@ -65,7 +65,7 @@ processResources {
                 "minecraft_dependency": project.property('minecraft_dependency'),
                 "java_version": javaVersion
     }
-    filesMatching("waylandfix.mixins.json") {
+    filesMatching("betterwayland.mixins.json") {
         expand "java_version": javaVersion,
                 "platform_preference_mixin": mcVersion >= 260100
                         ? ',\n    "SharedConstantsMixin"'

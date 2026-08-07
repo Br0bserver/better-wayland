@@ -1,26 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "waylandfix",
+  "id": "betterwayland",
   "version": "${version}",
-  "name": "WaylandFix",
+  "name": "BetterWayland",
   "description": "Native GLFW Wayland compatibility fixes for Minecraft ${minecraft_version}.",
   "authors": ["br0b"],
   "contact": {
     "sources": "https://github.com/Br0bserver/wayland-fix-mod"
   },
   "license": "LGPL-3.0-or-later",
+  "icon": "assets/betterwayland/icon.png",
   "environment": "client",
   "entrypoints": {
-    "preLaunch": ["dev.br0b.waylandfix.bootstrap.NativeBootstrap"],
-    "client": ["dev.br0b.waylandfix.WaylandFixClient"]
+    "preLaunch": ["dev.br0b.betterwayland.bootstrap.NativeBootstrap"],
+    "client": ["dev.br0b.betterwayland.BetterWaylandClient"]
   },
-  "mixins": ["waylandfix.mixins.json"],
+  "mixins": ["betterwayland.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.2",
     "minecraft": "${minecraft_dependency}",
     "java": ">=${java_version}"
   },
   "breaks": {
-    "fullscreenfix": "*"
+    "fullscreenfix": "*",
+    "waylandfix": "*"
   }
 }

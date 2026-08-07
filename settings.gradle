@@ -22,7 +22,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "wayland-fix-mod"
+rootProject.name = "better-wayland"
 
 [
         "1.20.1-fabric",
