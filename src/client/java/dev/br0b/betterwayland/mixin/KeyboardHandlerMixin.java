@@ -47,14 +47,18 @@ public final class KeyboardHandlerMixin implements InputResettable {
     }
 
     //#if MC >= 12110
+    //#if MC >= 260100
     @Inject(method = "keyPress", at = @At("HEAD"), order = 800)
+    //#else
+    //$$ @Inject(method = "keyPress", at = @At("HEAD"))
+    //#endif
     private void betterwayland$observeKey(long window, int action, KeyEvent event, CallbackInfo callback) {
         boolean opensTextScreen = minecraft.options.keyChat.matches(event)
                 || minecraft.options.keyCommand.matches(event);
         betterwayland$observeKeyState(event.key(), action, opensTextScreen);
     }
     //#else
-    //$$ @Inject(method = "keyPress", at = @At("HEAD"), order = 800)
+    //$$ @Inject(method = "keyPress", at = @At("HEAD"))
     //$$ private void betterwayland$observeKey(
     //$$         long window, int key, int scanCode, int action, int modifiers, CallbackInfo callback) {
     //$$     boolean opensTextScreen = minecraft.options.keyChat.matches(key, scanCode)
@@ -81,14 +85,18 @@ public final class KeyboardHandlerMixin implements InputResettable {
     }
 
     //#if MC >= 12110
+    //#if MC >= 260100
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, order = 900)
+    //#else
+    //$$ @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    //#endif
     private void betterwayland$dropOpeningCharacter(long window, CharacterEvent event, CallbackInfo callback) {
         if (betterwayland$input.consumeOpeningCharacter(event.codepoint())) {
             callback.cancel();
         }
     }
     //#else
-    //$$ @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, order = 900)
+    //$$ @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     //$$ private void betterwayland$dropOpeningCharacter(
     //$$         long window, int codePoint, int modifiers, CallbackInfo callback) {
     //$$     if (betterwayland$input.consumeOpeningCharacter(codePoint)) {
