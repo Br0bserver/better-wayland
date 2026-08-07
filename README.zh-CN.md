@@ -37,6 +37,8 @@ BetterWayland 是一个 Fabric 客户端模组，在保留 GLFW 作为窗口与�
 
 - Minecraft 1.20.x-1.21.x 构建需要 Fabric Loader 0.14.21 或更高版本；
   26.x 构建需要 0.19.2 或更高版本。
+- Minecraft 1.20.1 构建除原版文本框外，还明确支持 REI 搜索框中的组合输入、
+  候选窗口和预编辑文本显示。
 - 支持 Linux x86_64 Wayland 会话。使用内置原生库时不要另外设置 GLFW
   覆盖。
 - 明确不兼容 BorderlessFullscreen/FullscreenFix（`fullscreenfix`），其全屏

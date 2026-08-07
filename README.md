@@ -43,6 +43,8 @@ replace GLFW with SDL.
 
 - Minecraft 1.20.x-1.21.x builds require Fabric Loader 0.14.21 or newer;
   26.x builds require 0.19.2 or newer.
+- The Minecraft 1.20.1 build explicitly supports composition, candidates, and
+  preedit rendering in REI search fields as well as vanilla text fields.
 - Supports Linux x86_64 Wayland sessions. Do not configure an external GLFW
   override while using the bundled native.
 - Intentionally incompatible with BorderlessFullscreen/FullscreenFix

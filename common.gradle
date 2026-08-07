@@ -36,6 +36,11 @@ loom {
     }
 }
 
+if (mcVersion >= 260100) {
+    sourceSets.client.java.exclude("dev/br0b/betterwayland/input/Legacy*.java")
+    sourceSets.client.java.exclude("dev/br0b/betterwayland/mixin/Legacy*.java")
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.property('dependencies.minecraft_version')}"
     if (mcVersion < 260000) {
@@ -71,6 +76,9 @@ processResources {
         expand "java_version": javaVersion,
                 "platform_preference_mixin": mcVersion >= 260100
                         ? ',\n    "SharedConstantsMixin"'
+                        : '',
+                "legacy_text_input_mixins": mcVersion < 260100
+                        ? ',\n    "LegacyEditBoxMixin",\n    "LegacyMinecraftMixin",\n    "LegacyReiTextFieldMixin"'
                         : '',
                 "text_input_mixins": mcVersion >= 260100
                         ? ',\n    "MinecraftTextInputMixin",\n    "KeyboardPreeditMixin",\n    "TextInputManagerMixin",\n    "IMEPreeditOverlayMixin",\n    "GuiMixin"'

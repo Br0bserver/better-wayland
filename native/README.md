@@ -24,5 +24,7 @@ focus between text widgets, so the compositor cannot carry a candidate window
 from the old widget into the new one. Patch 0010 connects GLFW's IME input mode
 to Wayland text-input enable/disable transactions, keeping fcitx/IBus detached
 while Minecraft has no active text field.
+Patch 0011 forwards committed Wayland IME characters through both GLFW character
+callback variants, which is required by Minecraft 1.20.x's `char-mods` path.
 Release CI must run this task before assembling beta jars. The native output is
 shared by all version projects under `versions/`.
