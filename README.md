@@ -52,7 +52,7 @@ replace GLFW with SDL.
 ## Installation
 
 Download the jar matching your Minecraft build from
-[Releases](https://github.com/Br0bserver/wayland-fix-mod/releases), remove any
+[Releases](https://github.com/Br0bserver/better-wayland/releases), remove any
 old WaylandFix jar, and place BetterWayland in the instance's `mods` directory.
 Fabric Loader will reject a jar whose declared Minecraft range does not match.
 

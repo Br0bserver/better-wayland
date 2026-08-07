@@ -6,7 +6,7 @@
   "description": "Native GLFW Wayland compatibility fixes for Minecraft ${minecraft_version}.",
   "authors": ["br0b"],
   "contact": {
-    "sources": "https://github.com/Br0bserver/wayland-fix-mod"
+    "sources": "https://github.com/Br0bserver/better-wayland"
   },
   "license": "LGPL-3.0-or-later",
   "icon": "assets/betterwayland/icon.png",
