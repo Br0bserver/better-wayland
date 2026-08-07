@@ -45,7 +45,7 @@ BetterWayland 是一个 Fabric 客户端模组，在保留 GLFW 作为窗口与�
 
 ## 安装
 
-从 [Releases](https://github.com/Br0bserver/wayland-fix-mod/releases) 下载与
+从 [Releases](https://github.com/Br0bserver/better-wayland/releases) 下载与
 Minecraft 构建版本对应的 JAR，删除旧版 WaylandFix，然后将 BetterWayland
 放入实例的 `mods` 目录。JAR 声明的 Minecraft 范围不匹配时，Fabric Loader
 会拒绝加载。
